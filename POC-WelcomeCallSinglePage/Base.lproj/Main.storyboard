@@ -54,7 +54,6 @@
                                     <color key="titleColor" red="0.35174614189999998" green="0.99992066619999997" blue="0.49547046420000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 </state>
                                 <connections>
-                                    <action selector="startButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Xqn-k1-JVa"/>
                                     <action selector="stopButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="IdT-Xn-joZ"/>
                                 </connections>
                             </button>
@@ -80,6 +79,7 @@
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
                     <connections>
+                        <outlet property="startButtonOutler" destination="r4r-CP-qCf" id="Ef4-Aj-Xvb"/>
                         <outlet property="stopButtonOutlet" destination="BwZ-l6-M4P" id="bTO-h8-i2Y"/>
                         <outlet property="videoPlayerViewer" destination="O4M-ec-qdc" id="BUO-an-b2o"/>
                         <outlet property="videoRecorderViewer" destination="agd-Y9-erb" id="7Qi-zW-5v0"/>

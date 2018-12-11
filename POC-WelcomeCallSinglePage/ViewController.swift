@@ -38,9 +38,11 @@ class ViewController: UIViewController, AVCaptureFileOutputRecordingDelegate {
     /**
      * Entry point for starting recording
     */
+    @IBOutlet weak var startButtonOutler: UIButton!
     @IBAction func startButton(_ sender: Any) {
         // ** Show the stop button
         stopButtonOutlet.isHidden = false
+        startButtonOutler.isHidden = true
         
         // ** Begin the recording session first
         print ("OK.  Start Button has been clicked.")
@@ -52,6 +54,10 @@ class ViewController: UIViewController, AVCaptureFileOutputRecordingDelegate {
     @IBOutlet weak var stopButtonOutlet: UIButton!
     @IBAction func stopButton(_ sender: Any) {
         movieOutput.stopRecording()
+        
+        // ** Toggle button visibility
+        stopButtonOutlet.isHidden = true
+        startButtonOutler.isHidden = false
     }
     // END   UI EVENTS
     

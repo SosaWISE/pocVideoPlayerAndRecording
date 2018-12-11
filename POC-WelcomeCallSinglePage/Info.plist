@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>And we need to save video to your library.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>And yes we need to hear what you are saying.</string>
 	<key>NSCameraUsageDescription</key>
