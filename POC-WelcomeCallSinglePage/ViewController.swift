@@ -31,6 +31,14 @@ class ViewController: UIViewController, AVCaptureFileOutputRecordingDelegate {
     // START UI PROPERTIES
     @IBOutlet weak var videoPlayerViewer: UIView!
     @IBOutlet weak var videoRecorderViewer: UIView!
+    
+    var asset: AVAsset!
+    var playerItem: AVPlayerItem!
+    // Key-value observing context
+    private var playerItemContext = 0
+    
+    let requiredAssetKeys = ["playable", "hasProtectedContent"]
+
     // END   UI PROPERTIES
     
     // START UI EVENTS
@@ -75,14 +83,21 @@ class ViewController: UIViewController, AVCaptureFileOutputRecordingDelegate {
     
     var stillImageOutput: AVCaptureStillImageOutput = AVCaptureStillImageOutput()
     // END   CONTROLLER PROPERTIES
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
         
+        // ** INIT
         // ** Setup Initial UI Stuff
         stopButtonOutlet.isHidden = true;
+
     }
+//    override func viewDidLoad() {
+//        super.viewDidLoad()
+//        // Do any additional setup after loading the view, typically from a nib.
+//
+//        // ** Setup Initial UI Stuff
+//        stopButtonOutlet.isHidden = true;
+//    }
     
     // START MAIN METHODS
     func startRecording() {
@@ -96,8 +111,47 @@ class ViewController: UIViewController, AVCaptureFileOutputRecordingDelegate {
         if captureDevice != nil {
             beginSession()
         }
+
+        // ** Now we are going to play the video
+        playVideoWithEndOfVideoEvent()
     }
     
+    private func playVideoWithEndOfVideoEvent() {
+        // ** INIT
+        // ** Fing the video we will be playing
+        let mediaName = "51-Conclusion.mp4".components(separatedBy: ".")
+        
+        // ** ** Get path or handle of video
+        guard let path = Bundle.main.path(forResource: mediaName[0], ofType: mediaName[1]) else {
+            debugPrint("\(mediaName) not found")
+            return
+        }
+        let url: URL = URL(fileURLWithPath: path)
+        
+        // ** Set the asset
+        asset = AVAsset(url: url)
+        
+        // ** Create a new AVPlayerItem with the asset and an array of asset keys to be automatically loaded
+        playerItem = AVPlayerItem(asset: asset, automaticallyLoadedAssetKeys: requiredAssetKeys)
+        
+        //        // ** Register an observer of the player item's status property
+        //        playerItem.addObserver(self, forKeyPath: #keyPath(AVPlayerItem.status), options: [.old, .new], context: &playerItemContext)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(ViewController.finishVideo), name: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: nil)
+        
+        // ** Associate the playerItem with the player
+        let payler = AVPlayer(playerItem: playerItem)
+        let playerLayer = AVPlayerLayer(player: payler)
+        playerLayer.frame = self.videoPlayerViewer.bounds
+        self.videoPlayerViewer.layer.addSublayer(playerLayer)
+        
+        payler.play()
+    }
+    
+    @objc func finishVideo() {
+        print("******|======> Video finished playing....")
+    }
+
     func beginSession() {
         previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
         previewLayer?.videoGravity = AVLayerVideoGravity.resizeAspectFill
