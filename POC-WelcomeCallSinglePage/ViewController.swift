@@ -9,7 +9,25 @@
 import UIKit
 import AVFoundation
 
-class ViewController: UIViewController {
+// ** Global & State Vars
+struct FluentGlobal {
+    static var videoMediaId = 1
+}
+
+class ViewController: UIViewController, AVCaptureFileOutputRecordingDelegate {
+    func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
+        if (error != nil) {
+            print("An error occurred: \(error!.localizedDescription)")
+            
+        } else {
+            
+            // ** This saves to the PhotoLibrary
+            print ("Here you go file output goes:  \(outputFileURL)")
+            videoFilePath = outputFileURL
+            UISaveVideoAtPathToSavedPhotosAlbum(outputFileURL.path, nil, nil, nil)
+        }
+    }
+    
     // START UI PROPERTIES
     @IBOutlet weak var videoPlayerViewer: UIView!
     @IBOutlet weak var videoRecorderViewer: UIView!
@@ -27,12 +45,8 @@ class ViewController: UIViewController {
         // ** Begin the recording session first
         print ("OK.  Start Button has been clicked.")
         
-        // ** INIT
-        captureSession.sessionPreset = AVCaptureSession.Preset.photo
-        captureCameraAndAudioDevices()
-        if captureDevice != nil {
-            beginSession()
-        }
+        // ** BEGIN RECORDING
+        startRecording()
     }
 
     @IBOutlet weak var stopButtonOutlet: UIButton!
@@ -66,10 +80,43 @@ class ViewController: UIViewController {
     
     // START MAIN METHODS
     func startRecording() {
+        // ** INIT captureDevice
         captureDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: AVMediaType.video, position: .front)
-        
-        print ("I want to know if we have a captureDevice: \(captureDevice)")
+        print ("******|======> I want to know if we have a captureDevice: \(captureDevice)")
 
+        // ** CAPTURE CAMERA AND AUDIO DEVICES...
+        captureSession.sessionPreset = AVCaptureSession.Preset.photo
+        captureCameraAndAudioDevices()
+        if captureDevice != nil {
+            beginSession()
+        }
+    }
+    
+    func beginSession() {
+        previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
+        previewLayer?.videoGravity = AVLayerVideoGravity.resizeAspectFill
+        previewLayer?.connection?.videoOrientation = .portrait
+        
+        videoRecorderViewer.layer.addSublayer(previewLayer!)
+        previewLayer?.frame.size = videoRecorderViewer.layer.frame.size
+        
+        print("******======> PreviewLayer size = \(previewLayer?.frame.size)")
+        print("******======> cameraView size = \(videoRecorderViewer.layer.frame.size)")
+        
+        captureSession.addOutput(movieOutput)
+        
+        captureSession.startRunning()
+        stillImageOutput.outputSettings = [AVVideoCodecKey : AVVideoCodecType.jpeg]
+        if captureSession.canAddOutput(stillImageOutput) {
+            captureSession.addOutput(stillImageOutput)
+        }
+        
+        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+        let fileUrl = paths[0].appendingPathComponent("output-\(FluentGlobal.videoMediaId).mov")
+        try? FileManager.default.removeItem(at: fileUrl)
+        movieOutput.startRecording(to: fileUrl, recordingDelegate: self)
+        
+        print("|==*** HERE is another fileUrl: \(fileUrl)")
     }
     
     func captureCameraAndAudioDevices() {
